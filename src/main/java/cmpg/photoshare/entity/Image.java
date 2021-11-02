@@ -1,5 +1,7 @@
 package cmpg.photoshare.entity;
 
+import lombok.Builder;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 
@@ -10,13 +12,16 @@ public class Image {
     private String path;
 
     @Column(name = "title")
+    private String title;
+
+    @Column(name="fileName")
     private String fileName;
 
     @Column(name = "geolocation")
-    private String GeoLocation;
+    private String geolocation;
 
     @Column(name = "capturedDate")
-    private LocalDate capturedDate;
+    private String capturedDate;
 
     @Column(name = "capturedBy")
     private String capturedBy;
@@ -30,6 +35,22 @@ public class Image {
     @Column(name = "isImage")
     private String isImage;
 
+    public Image(String path, String title, String fileName, String geolocation, String capturedDate, String capturedBy, String tags, String imageParent, String isImage) {
+        this.path = path;
+        this.title = title;
+        this.fileName = fileName;
+        this.geolocation = geolocation;
+        this.capturedDate = capturedDate;
+        this.capturedBy = capturedBy;
+        this.tags = tags;
+        this.imageParent = imageParent;
+        this.isImage = isImage;
+    }
+
+    public Image() {
+
+    }
+
     public String getPath() {
         return path;
     }
@@ -38,27 +59,19 @@ public class Image {
         this.path = path;
     }
 
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
     public String getGeoLocation() {
-        return GeoLocation;
+        return geolocation;
     }
 
-    public void setGeoLocation(String geoLocation) {
-        GeoLocation = geoLocation;
+    public void setGeoLocation(String geolocation) {
+        geolocation = geolocation;
     }
 
-    public LocalDate getCapturedDate() {
+    public String getCapturedDate() {
         return capturedDate;
     }
 
-    public void setCapturedDate(LocalDate capturedDate) {
+    public void setCapturedDate(String capturedDate) {
         this.capturedDate = capturedDate;
     }
 
@@ -92,5 +105,21 @@ public class Image {
 
     public void setIsImage(String isImage) {
         this.isImage = isImage;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

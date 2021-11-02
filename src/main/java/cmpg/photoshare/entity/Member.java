@@ -18,6 +18,16 @@ public class Member {
     @Column(name = "surname")
     private String surname;
 
+    public Member(String email, String hashedPass, String name, String surname) {
+        this.email = email;
+        this.hashedPass = hashedPass;
+        this.name = name;
+        this.surname = surname;
+    }
+
+    public Member() {
+    }
+
     public String getEmail() {
         return email;
     }

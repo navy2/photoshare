@@ -13,7 +13,7 @@ public class MemberService {
     @Autowired
     private MemberRepository memberRepository;
 
-    public Iterable<Member> getAllUsers(){
+    public Iterable<Member> getAllMembers(){
         return memberRepository.findAll();
     }
 
@@ -28,6 +28,8 @@ public class MemberService {
     public List<Member> login(String email, String hashedPass) {
         return memberRepository.findByEmailAndHashedPass(email, hashedPass);
     }
+
+    public Member getMember(String email){return memberRepository.findByEmail(email);}
 
     public void updateMember(Member member){
         memberRepository.updateMember(member.getName(),member.getSurname(), member.getEmail());

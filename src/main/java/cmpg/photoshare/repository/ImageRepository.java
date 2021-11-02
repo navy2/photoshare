@@ -11,7 +11,10 @@ public interface ImageRepository extends CrudRepository<Image, Long>{
 
     Image getImageByImageParentAndPath(String path, String imageParent);
     List<Image> getByImageParent(String path);
+    Image getImageByPath(String path);
 
+    Image findByTitle(String title);
+    Image save(Image image);
     @Transactional
     @Modifying
     public void deleteByPath(String path);
