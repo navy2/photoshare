@@ -7,6 +7,20 @@ import cmpg.photoshare.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import cmpg.photoshare.entity.Image;
+import cmpg.photoshare.entity.Member;
+import cmpg.photoshare.entity.MemberImage;
+import com.google.gson.Gson;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+import javax.servlet.http.HttpSession;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true")
@@ -25,5 +39,128 @@ public class ImageController {
         this.memberImageService = memberImageService;
         this.service = service;
     }
+    private static final String awsurl = "https://photoshare-cmpg.s3.us-east-2.amazonaws.com/";
 
+    @PostMapping(path="/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = "application/json")
+    public ResponseEntity<Image> imageUpload(@RequestParam("image") MultipartFile multipartFile,
+                                             @RequestParam("title") String title,
+                                             @RequestParam("imageParent")String imageParent,
+                                             @RequestParam("geolocation")String geolocation,
+                                             @RequestParam("tags") String tags,
+                                             HttpSession session) throws JSONException {
+        final String email = (String) session.getAttribute("email");
+        Image newImage = new Image();
+        String fileName = multipartFile.getOriginalFilename();
+
+        try{
+            String path = "";
+            path = email + "/" + multipartFile.getOriginalFilename();
+            String dbpath = awsurl+ path;
+            service.uploadFile(path,multipartFile);
+
+            newImage.setTitle(title);
+            newImage.setFileName(fileName);
+            newImage.setPath(dbpath);
+            newImage.setGeoLocation(geolocation);
+            newImage.setTags(tags);
+            newImage.setCapturedBy(email);
+            newImage.setCapturedDate(LocalDate.now().toString());
+            newImage.setIsImage("T");
+            newImage.setImageParent(imageParent);
+
+            imageService.uploadImage(newImage);
+            MemberImage memberImage = new MemberImage();
+            memberImage.setEmail(email);
+            memberImage.setPath(dbpath);
+            memberImageService.addMemberImage(memberImage);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<Image>(newImage, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Image>> getMemberFiles(HttpSession httpSession){
+        String email = (String) httpSession.getAttribute("email");
+        if(email==null){
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+        }
+        List<MemberImage> memberImageList = memberImageService.getByEmail(email);
+        List<Image> imageList = new ArrayList<>();
+
+        for(MemberImage memberImage: memberImageList){
+            Image image = imageService.getImageByPath(memberImage.getPath());
+            if(image!=null)
+            {
+                imageList.add(image);
+            }
+            else{System.out.println("image list empty");}
+        }
+        return new ResponseEntity(imageList, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/sharefile", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> shareFile(@RequestBody String data, HttpSession session) throws JSONException{
+
+        JSONObject jsonObject = new JSONObject(data);
+        Gson gson = new Gson();
+        JSONObject imageData = (JSONObject) jsonObject.get("filedata");
+        Image image = gson.fromJson(imageData.toString(), Image.class);
+        String shareWithEmail = jsonObject.getString("shareEmail");
+        Member member = memberService.getMember(shareWithEmail);
+
+        if(member == null)
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+        String email = (String) session.getAttribute("email");
+
+        if(email==null)
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+
+        MemberImage memberImage = new MemberImage();
+        memberImage.setEmail(shareWithEmail);
+        memberImage.setPath(image.getPath());
+        memberImageService.addMemberImage(memberImage);
+
+        return new ResponseEntity(null, HttpStatus.OK);
+    }
+
+    @PostMapping(path= "/createalbum", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Image> createAlbum(@RequestBody String data, HttpSession session) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(data);
+        String albumName =  jsonObject.getString("filename");
+        String albumParent = jsonObject.getString("fileparent");
+        String email = (String) session.getAttribute("email");
+
+        if(email == null)
+            return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+
+        String albumdbPath = awsurl + email + "/" + albumName;
+        Image image = new Image();
+
+        image.setFileName(albumName);
+        image.setPath(albumdbPath);
+        image.setCapturedBy(email);
+        image.setImageParent(albumParent);
+        image.setIsImage("F");
+        String albumPath = email +"/"+ albumName;
+        service.createFolder(albumPath);
+        imageService.uploadImage(image);
+
+        MemberImage memberImage = new MemberImage();
+        memberImage.setEmail(email);
+        memberImage.setPath(albumdbPath);
+        memberImageService.addMemberImage(memberImage);
+
+        return new ResponseEntity(image, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/getalbumimages", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Image>> getImagesInFolder(@RequestParam String path){
+        List<Image> imageList = imageService.getByImageParent(path);
+
+        return new ResponseEntity(imageList, HttpStatus.OK);
+    }
 }
