@@ -5,6 +5,7 @@ import cmpg.photoshare.service.MemberImageService;
 import cmpg.photoshare.service.MemberService;
 import cmpg.photoshare.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import cmpg.photoshare.entity.Image;
@@ -162,5 +163,39 @@ public class ImageController {
         List<Image> imageList = imageService.getByImageParent(path);
 
         return new ResponseEntity(imageList, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> deleteFile(@RequestBody Image image, HttpSession session) throws JSONException {
+        String email = (String) session.getAttribute("email");
+        if (email == null)
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+
+        String path = email + "/" + image.getFileName();
+
+        try {
+            service.deleteFile(path);
+            memberImageService.deleteByPath(image.getPath());
+            imageService.deleteImage(image.getPath());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity(null, HttpStatus.OK);
+    }
+
+    @GetMapping("/{fileName}")
+    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileName, HttpSession session) {
+        String email = (String) session.getAttribute("email");
+        String path = email + "/" + fileName;
+        byte[] data = service.downloadFile(path);
+        ByteArrayResource resource = new ByteArrayResource(data);
+        return ResponseEntity
+                .ok()
+                .contentLength(data.length)
+                .header("Content-type", "application/octet-stream")
+                .header("Content-disposition", "attachment; filename=\"" + fileName + "\"")
+                .body(resource);
     }
 }
