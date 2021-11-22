@@ -28,7 +28,7 @@ import java.util.List;
 import static org.apache.http.entity.ContentType.*;
 
 @Controller
-@CrossOrigin(origins = "https://photoshare-react.herokuapp.com", allowedHeaders = "*", allowCredentials = "true")
+@CrossOrigin(origins = "http://51.124.209.104:3000", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping(path = "/images")
 public class ImageController {
 
@@ -59,6 +59,7 @@ public class ImageController {
         Image newImage = new Image();
         String fileName = multipartFile.getOriginalFilename();
 
+        
         String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
         System.out.println(extension);
 

@@ -18,7 +18,7 @@ import java.io.InputStream;
 import java.util.List;
 
 @Controller
-@CrossOrigin(origins = "https://photoshare-react.herokuapp.com", allowedHeaders = "*", allowCredentials = "true")
+@CrossOrigin(origins = "http://51.124.209.104:3000", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping(path="/users")
 public class MemberController {
 
