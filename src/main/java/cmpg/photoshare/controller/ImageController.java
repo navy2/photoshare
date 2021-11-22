@@ -28,7 +28,7 @@ import java.util.List;
 import static org.apache.http.entity.ContentType.*;
 
 @Controller
-@CrossOrigin(origins = "https://photoshare-react.herokuapp.com", allowedHeaders = "*", allowCredentials = "true")
+@CrossOrigin(origins = "*", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping(path = "/images")
 public class ImageController {
 
