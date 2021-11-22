@@ -4,6 +4,7 @@ import cmpg.photoshare.service.ImageService;
 import cmpg.photoshare.service.MemberImageService;
 import cmpg.photoshare.service.MemberService;
 import cmpg.photoshare.service.StorageService;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Controller;
@@ -21,7 +22,10 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static org.apache.http.entity.ContentType.*;
 
 @Controller
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true")
@@ -48,10 +52,19 @@ public class ImageController {
                                              @RequestParam("imageParent")String imageParent,
                                              @RequestParam("geolocation")String geolocation,
                                              @RequestParam("tags") String tags,
+                                             @RequestParam("capturedBy") String capturedBy,
+                                             @RequestParam("capturedDate") String capturedDate,
                                              HttpSession session) throws JSONException {
         final String email = (String) session.getAttribute("email");
         Image newImage = new Image();
         String fileName = multipartFile.getOriginalFilename();
+
+        String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
+        System.out.println(extension);
+
+        if(!extension.equals("png") && !extension.equals("jpg") && !extension.equals("jpeg") && !extension.equals("ico")
+                && !extension.equals("gif") && !extension.equals("tiff") && !extension.equals("bmp"))
+        {return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);}
 
         try{
             String path = "";
@@ -64,8 +77,8 @@ public class ImageController {
             newImage.setPath(dbpath);
             newImage.setGeoLocation(geolocation);
             newImage.setTags(tags);
-            newImage.setCapturedBy(email);
-            newImage.setCapturedDate(LocalDate.now().toString());
+            newImage.setCapturedBy(capturedBy);
+            newImage.setCapturedDate(capturedDate);
             newImage.setIsImage("T");
             newImage.setImageParent(imageParent);
 

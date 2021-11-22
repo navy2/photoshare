@@ -48,7 +48,16 @@ public class MemberController {
         if(doesExist!=null)
             return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
 
-        Member newMember = memberService.addMember(member);
+        Member newMember = new Member();
+
+        String password = member.getHashedPass();
+        String hashToStore = org.apache.commons.codec.digest.DigestUtils.sha256Hex(password);
+        newMember.setName(member.getName());
+        newMember.setSurname(member.getSurname());
+        newMember.setEmail(member.getEmail());
+        newMember.setHashedPass(hashToStore);
+
+        memberService.addMember(newMember);
 
         if(newMember == null)
             return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
@@ -66,7 +75,8 @@ public class MemberController {
         throws JSONException{
 
         session.setAttribute("email", member.getEmail());
-        List<Member> mem = memberService.login(member.getEmail(), member.getHashedPass());
+        String hash = org.apache.commons.codec.digest.DigestUtils.sha256Hex(member.getHashedPass());
+        List<Member> mem = memberService.login(member.getEmail(), hash);
         if(mem.size()>0)
             return new ResponseEntity(true, HttpStatus.OK);
         return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
