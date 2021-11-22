@@ -28,7 +28,7 @@ import java.util.List;
 import static org.apache.http.entity.ContentType.*;
 
 @Controller
-@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true")
+@CrossOrigin(origins = "https://photoshare-frontend.azurewebsites.net", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping(path = "/images")
 public class ImageController {
 

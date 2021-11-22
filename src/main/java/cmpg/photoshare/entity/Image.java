@@ -64,7 +64,7 @@ public class Image {
     }
 
     public void setGeoLocation(String geolocation) {
-        geolocation = geolocation;
+        this.geolocation = geolocation;
     }
 
     public String getCapturedDate() {

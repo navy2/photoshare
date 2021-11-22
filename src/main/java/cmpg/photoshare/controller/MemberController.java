@@ -18,7 +18,7 @@ import java.io.InputStream;
 import java.util.List;
 
 @Controller
-@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true")
+@CrossOrigin(origins = "https://photoshare-frontend.azurewebsites.net", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping(path="/users")
 public class MemberController {
 
