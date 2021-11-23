@@ -59,8 +59,8 @@ public class ImageController {
         Image newImage = new Image();
         String fileName = multipartFile.getOriginalFilename();
 
-        
-        String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
+
+        String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename().toLowerCase());
         System.out.println(extension);
 
         if(!extension.equals("png") && !extension.equals("jpg") && !extension.equals("jpeg") && !extension.equals("ico")
